@@ -5,7 +5,9 @@ EXTRA_DIST = 20-bluealsa.conf
 
 asound_module_ctl_LTLIBRARIES = libasound_module_ctl_bluealsa.la
 asound_module_pcm_LTLIBRARIES = libasound_module_pcm_bluealsa.la
-asound_module_conf_DATA = 20-bluealsa.conf
+asound_module_pcm_proxy_LTLIBRARIES = libasound_module_pcm_bluealsa_proxy.la
+
+asound_module_data_DATA = 20-bluealsa.conf 20-bluealsa_proxy.conf
 
 libasound_module_ctl_bluealsa_la_SOURCES = \
 	../shared/ctl-client.c \
@@ -19,7 +21,7 @@ libasound_module_pcm_bluealsa_la_SOURCES = \
 
 asound_module_ctldir = @ALSA_PLUGIN_DIR@
 asound_module_pcmdir = @ALSA_PLUGIN_DIR@
-asound_module_confdir = @ALSA_CONF_DIR@
+asound_module_datadir = @ALSA_DATA_DIR@/alsa.conf.d
 
 AM_CFLAGS = \
 	-I$(top_srcdir)/src \
