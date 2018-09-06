@@ -3,6 +3,7 @@
 
 bin_PROGRAMS = bluealsa
 SUBDIRS = asound
+SUBDIRS += bluealsalib
 
 bluealsa_SOURCES = \
 	shared/ffb.c \
