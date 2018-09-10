@@ -130,7 +130,7 @@ static void *io_thread(void *arg) {
 
 wait_pcm_fd:
 
-	debug("PLUGIN io-thread: wait for pcm_fd\n");
+	//debug("PLUGIN io-thread: wait for pcm_fd\n");
 
 	/* In the capture mode, the PCM FIFO is opened in the non-blocking mode.
 	 * So right now, we have to synchronize write and read sides, otherwise
@@ -784,7 +784,14 @@ int bluealsa_proxy_set_remote_device(const char * interface, const char * device
 
 	enum pcm_type type;
 
-	if (device == NULL || str2ba(device, &the_pcm->addr) != 0) {
+	/* When the hardware address is NULL, just close the connection */
+	if (device == NULL ) {
+		close_bluez_connection();
+		ret = 0;
+		goto failed;
+	}
+
+	if ( str2ba(device, &the_pcm->addr) != 0) {
 		SNDERR("Invalid BT device address: %s", device);
 		ret = -EINVAL;
 		goto failed;
