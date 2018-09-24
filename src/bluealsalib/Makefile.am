@@ -26,4 +26,7 @@ libbluealsa_la_LIBADD = \
 	@BLUEZ_LIBS@ \
 	@GIO2_LIBS@
 
+libbluealsa_la_LDFLAGS = \
+	-version-info 0:0:0
+
 LDADD=libbluealsa.la
