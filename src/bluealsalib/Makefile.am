@@ -7,11 +7,15 @@ test_lib_SOURCES=test_lib.c
 
 bluealsalib_LTLIBRARIES = libbluealsa.la
 
+include_HEADERS = bluealsa.h
+
 libbluealsa_la_SOURCES = \
 	bluealsa.c \
 	../shared/ctl-client.c
 
 bluealsalibdir = $(libdir)
+pkgconfigdir = $(libdir)/pkgconfig 
+pkgconfig_DATA = bluealsalib.pc
 
 AM_CFLAGS = \
 	-I$(top_srcdir)/src \
