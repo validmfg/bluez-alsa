@@ -14,8 +14,8 @@ libbluealsa_la_SOURCES = \
 	../shared/ctl-client.c
 
 bluealsalibdir = $(libdir)
-pkgconfigdir = $(libdir)/pkgconfig 
-pkgconfig_DATA = bluealsalib.pc
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA =bluealsalib.pc
 
 AM_CFLAGS = \
 	-I$(top_srcdir)/src \
