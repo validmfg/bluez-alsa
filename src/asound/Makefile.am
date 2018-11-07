@@ -19,8 +19,15 @@ libasound_module_pcm_bluealsa_la_SOURCES = \
 	../shared/rt.c \
 	bluealsa-pcm.c
 
+libasound_module_pcm_bluealsa_proxy_la_SOURCES = \
+	../shared/ctl-client.c \
+	../shared/log.c \
+	../shared/rt.c \
+	bluealsa-pcm-proxy.c
+
 asound_module_ctldir = @ALSA_PLUGIN_DIR@
 asound_module_pcmdir = @ALSA_PLUGIN_DIR@
+asound_module_pcm_proxydir = @ALSA_PLUGIN_DIR@
 asound_module_datadir = @ALSA_DATA_DIR@/alsa.conf.d
 
 AM_CFLAGS = \

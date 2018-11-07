@@ -45,7 +45,7 @@ struct bluealsa_pcm {
 	int event_fd;
 
 	/* requested transport */
-	struct msg_transport * transport;
+	struct ba_msg_transport transport;
 	size_t pcm_buffer_size;
 
 	int pcm_fd;
@@ -76,8 +76,8 @@ struct bluealsa_pcm {
 	char interface[INTERFACE_STR_MAXLEN];
 	bdaddr_t addr;
 	char profile[PROFILE_STR_MAXLEN];
-	enum pcm_type type;
-	enum pcm_stream stream;
+	enum ba_pcm_type type;
+	enum ba_pcm_stream stream;
 
 };
 
@@ -94,10 +94,12 @@ static int open_bluez_connection();
 static int close_transport(struct bluealsa_pcm *pcm) {
 
 	debug("%s ...\n", __func__);
-	if (pcm->transport == NULL)
+	if (pcm == NULL)
+		return 0;
+	if (pcm->pcm_fd == -1)
 		return 0;
 
-	int rv = bluealsa_close_transport(pcm->fd, pcm->transport);
+	int rv = bluealsa_close_transport(pcm->fd, &pcm->transport);
 	int err = errno;
 
 	close(pcm->pcm_fd);
@@ -179,7 +181,7 @@ wait_pcm_fd:
 	const snd_pcm_channel_area_t *areas = snd_pcm_ioplug_mmap_areas(io);
 
 	struct asrsync asrs;
-	asrsync_init(asrs, io->rate);
+	asrsync_init(&asrs, io->rate);
 
 	for (;;) {
 
@@ -193,7 +195,7 @@ wait_pcm_fd:
 			goto final;
 		default:
 			sigwait(&sigset, &tmp);
-			asrsync_init(asrs, io->rate);
+			asrsync_init(&asrs, io->rate);
 		}
 
 		snd_pcm_uframes_t io_ptr = pcm->io_ptr;
@@ -308,7 +310,7 @@ static int bluealsa_proxy_start(snd_pcm_ioplug_t *io) {
 	/* initialize delay calculation */
 	pcm->delay = 0;
 
-	if (pcm->transport && bluealsa_pause_transport(pcm->fd, pcm->transport, false) == -1) {
+	if (bluealsa_pause_transport(pcm->fd, &pcm->transport, false) == -1) {
 		debug("Couldn't start PCM: %s\n", strerror(errno));
 		return -errno;
 	}
@@ -417,7 +419,7 @@ static int bluealsa_proxy_prepare(snd_pcm_ioplug_t *io) {
 static int bluealsa_proxy_drain(snd_pcm_ioplug_t *io) {
 	struct bluealsa_pcm *pcm = io->private_data;
 
-	if (bluealsa_drain_transport(pcm->fd, pcm->transport) == -1)
+	if (bluealsa_drain_transport(pcm->fd, &pcm->transport) == -1)
 		return -errno;
 	return 0;
 }
@@ -425,7 +427,7 @@ static int bluealsa_proxy_drain(snd_pcm_ioplug_t *io) {
 static int bluealsa_proxy_pause(snd_pcm_ioplug_t *io, int enable) {
 	struct bluealsa_pcm *pcm = io->private_data;
 
-	if (bluealsa_pause_transport(pcm->fd, pcm->transport, enable) == -1)
+	if (bluealsa_pause_transport(pcm->fd, &pcm->transport, enable) == -1)
 		return -errno;
 
 	if (enable == 0) {
@@ -446,16 +448,10 @@ static void bluealsa_proxy_dump(snd_pcm_ioplug_t *io, snd_output_t *out) {
 	struct bluealsa_pcm *pcm = io->private_data;
 	char addr[18];
 
-	if (pcm->transport == NULL) {
-		snd_output_printf(out, "Bluetooth Proxy: no transport yet\n");
-		return;
-	}
-
-	ba2str(&pcm->transport->addr, addr);
-	snd_output_printf(out, "Bluetooth Proxy device: %s\n", addr);
-	snd_output_printf(out, "Bluetooth Proxy profile: %d\n", pcm->transport->type);
-	snd_output_printf(out, "Bluetooth Proxy codec: %d\n", pcm->transport->codec);
-
+	ba2str(&pcm->transport.addr, addr);
+	snd_output_printf(out, "Bluetooth device: %s\n", addr);
+	snd_output_printf(out, "Bluetooth profile: %d\n", pcm->transport.type);
+	snd_output_printf(out, "Bluetooth codec: %d\n", pcm->transport.codec);
 }
 
 static int bluealsa_proxy_delay(snd_pcm_ioplug_t *io, snd_pcm_sframes_t *delayp) {
@@ -490,7 +486,7 @@ static int bluealsa_proxy_delay(snd_pcm_ioplug_t *io, snd_pcm_sframes_t *delayp)
 				(pcm->delay == 0 || ++counter % (io->rate / 10) == 0)) {
 
 			unsigned int tmp;
-			if ((tmp = bluealsa_get_transport_delay(pcm->fd, pcm->transport)) != -1) {
+			if (bluealsa_get_transport_delay(pcm->fd, &pcm->transport, &tmp) != -1) {
 				pcm->delay = (io->rate / 100) * tmp / 100;
 				debug("BlueALSA delay: %.1f ms (%ld frames)", (float)tmp / 10, pcm->delay);
 			}
@@ -581,17 +577,17 @@ static const snd_pcm_ioplug_callback_t bluealsa_proxy_callback = {
 	.poll_revents = bluealsa_proxy_poll_revents,
 };
 
-static enum pcm_type bluealsa_proxy_parse_profile(const char *profile) {
+static enum ba_pcm_type bluealsa_proxy_parse_profile(const char *profile) {
 
 	if (profile == NULL)
-		return PCM_TYPE_NULL;
+		return BA_PCM_TYPE_NULL;
 
 	if (strcasecmp(profile, "a2dp") == 0)
-		return PCM_TYPE_A2DP;
+		return BA_PCM_TYPE_A2DP;
 	else if (strcasecmp(profile, "sco") == 0)
-		return PCM_TYPE_SCO;
+		return BA_PCM_TYPE_SCO;
 
-	return PCM_TYPE_NULL;
+	return BA_PCM_TYPE_NULL;
 }
 
 /* This must be called when a transport is available */
@@ -628,8 +624,8 @@ static int bluealsa_proxy_set_hw_constraint(struct bluealsa_pcm *pcm) {
 	 * the transport sampling rate and the number of channels, so the buffer
 	 * "time" size will be constant. The minimal period size and buffer size
 	 * are respectively 10 ms and 200 ms. Upper limits are not constraint. */
-	unsigned int min_p = pcm->transport->sampling * 10 / 1000 * pcm->transport->channels * 2;
-	unsigned int min_b = pcm->transport->sampling * 200 / 1000 * pcm->transport->channels * 2;
+	unsigned int min_p = pcm->transport.sampling * 10 / 1000 * pcm->transport.channels * 2;
+	unsigned int min_b = pcm->transport.sampling * 200 / 1000 * pcm->transport.channels * 2;
 
 	if ((err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_PERIOD_BYTES,
 					min_p, 1024 * 16)) < 0)
@@ -640,11 +636,11 @@ static int bluealsa_proxy_set_hw_constraint(struct bluealsa_pcm *pcm) {
 		return err;
 
 	if ((err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_CHANNELS,
-					pcm->transport->channels, pcm->transport->channels)) < 0)
+					pcm->transport.channels, pcm->transport.channels)) < 0)
 		return err;
 
 	if ((err = snd_pcm_ioplug_set_param_minmax(io, SND_PCM_IOPLUG_HW_RATE,
-					pcm->transport->sampling, pcm->transport->sampling)) < 0)
+					pcm->transport.sampling, pcm->transport.sampling)) < 0)
 		return err;
 
 	return 0;
@@ -677,10 +673,9 @@ SND_PCM_PLUGIN_DEFINE_FUNC(bluealsa_proxy) {
 	pcm->io.mmap_rw = 1;
 	pcm->io.callback = &bluealsa_proxy_callback;
 	pcm->io.private_data = pcm;
-	pcm->transport = NULL;
 
-	enum pcm_stream _stream = stream == SND_PCM_STREAM_PLAYBACK ?
-			PCM_STREAM_PLAYBACK : PCM_STREAM_CAPTURE;
+	enum ba_pcm_stream _stream = stream == SND_PCM_STREAM_PLAYBACK ?
+			BA_PCM_STREAM_PLAYBACK : BA_PCM_STREAM_CAPTURE;
 
 	pcm->stream = stream;
 
@@ -729,7 +724,7 @@ static int open_bluez_connection() {
 		goto fail;
 	}
 
-	if ((pcm->transport = bluealsa_get_transport(pcm->fd, pcm->addr, pcm->type, pcm->stream)) == NULL) {
+	if ((bluealsa_get_transport(pcm->fd, pcm->addr, pcm->type, pcm->stream, &pcm->transport )) == -1) {
 		SNDERR("Couldn't get BlueALSA transport: %s", strerror(errno));
 		ret = -errno;
 		goto fail;
@@ -740,16 +735,16 @@ static int open_bluez_connection() {
 		goto fail;
 	}
 
-	pcm->transport->stream = pcm->stream;
+	pcm->transport.stream = pcm->stream;
 
-	if ((pcm->pcm_fd = bluealsa_open_transport(pcm->fd, pcm->transport)) == -1) {
+	if ((pcm->pcm_fd = bluealsa_open_transport(pcm->fd, &pcm->transport)) == -1) {
 		debug("Couldn't open PCM FIFO: %s", strerror(errno));
 		return -errno;
 	}
 
 	debug("PLUGIN: starting transport\n");
 
-	if (bluealsa_pause_transport(pcm->fd, pcm->transport, false) == -1) {
+	if (bluealsa_pause_transport(pcm->fd, &pcm->transport, false) == -1) {
 		debug("Couldn't start PCM: %s", strerror(errno));
 		return -errno;
 	}
@@ -782,7 +777,7 @@ int bluealsa_proxy_set_remote_device(const char * interface, const char * device
 		goto failed;
 	}
 
-	enum pcm_type type;
+	enum ba_pcm_type type;
 
 	/* When the hardware address is NULL, just close the connection */
 	if (device == NULL ) {
@@ -797,7 +792,7 @@ int bluealsa_proxy_set_remote_device(const char * interface, const char * device
 		goto failed;
 	}
 
-	if ((type = bluealsa_proxy_parse_profile(profile)) == PCM_TYPE_NULL) {
+	if ((type = bluealsa_proxy_parse_profile(profile)) == BA_PCM_TYPE_NULL) {
 		SNDERR("Invalid BT profile [a2dp, sco]: %s", profile);
 		ret = -EINVAL;
 		goto failed;
