@@ -8,5 +8,5 @@ Description: BluezAlsa modules
 URL: https://github.com/Arkq/bluez-alsa
 Version: @VERSION@
 Requires:
-Libs: -L${libdir} -lbluezalsa
+Libs: -L${libdir} -lasound_module_ctl_bluealsa -lasound_module_pcm_bluealsa -lasound_module_pcm_bluealsa_proxy
 Cflags: -I{includedir}
