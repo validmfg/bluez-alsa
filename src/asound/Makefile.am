@@ -7,12 +7,16 @@ asound_module_ctl_LTLIBRARIES = libasound_module_ctl_bluealsa.la
 asound_module_pcm_LTLIBRARIES = libasound_module_pcm_bluealsa.la
 asound_module_pcm_proxy_LTLIBRARIES = libasound_module_pcm_bluealsa_proxy.la
 
-include_HEADERS = \
+pkginclude_HEADERS = \
 	../shared/ctl-client.h \
 	../shared/defs.h \
 	../shared/ffb.h \
 	../shared/log.h \
 	../shared/rt.h
+
+pkgincludedir = $(includedir)/bluez-alsa
+pkgconfigdir = $(libdir)/pkgconfig
+pkgconfig_DATA =bluezalsa.pc
 
 asound_module_data_DATA = 20-bluealsa.conf 20-bluealsa_proxy.conf
 
@@ -31,10 +35,6 @@ libasound_module_pcm_bluealsa_proxy_la_SOURCES = \
 	../shared/log.c \
 	../shared/rt.c \
 	bluealsa-pcm-proxy.c
-
-bluezalsadir = $(libdir)/bluez-alsa
-pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA =bluezalsa.pc
 
 asound_module_ctldir = @ALSA_PLUGIN_DIR@
 asound_module_pcmdir = @ALSA_PLUGIN_DIR@
