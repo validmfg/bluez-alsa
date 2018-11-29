@@ -39,7 +39,7 @@ struct bluezalsa_handle {
 	char * interface;
 	bdaddr_t * addr;
 	bluezalsa_type type;
-	struct msg_transport transport;
+	struct ba_msg_transport transport;
 	pthread_t monitor;
 	pthread_mutex_t transport_mutex;
 };
@@ -50,13 +50,13 @@ struct bluezalsa_handle {
 }})
 
 
-static void event2string(struct msg_event * event, char * str) {
+static void event2string(struct ba_msg_event * event, char * str) {
 	str[0] = '\0';
-	EVENT_CASE(event, EVENT_TRANSPORT_ADDED, str);
-	EVENT_CASE(event, EVENT_TRANSPORT_CHANGED, str);
-	EVENT_CASE(event, EVENT_TRANSPORT_REMOVED, str);
-	EVENT_CASE(event, EVENT_UPDATE_BATTERY, str);
-	EVENT_CASE(event, EVENT_UPDATE_VOLUME, str);
+	EVENT_CASE(event, BA_EVENT_TRANSPORT_ADDED, str);
+	EVENT_CASE(event, BA_EVENT_TRANSPORT_CHANGED, str);
+	EVENT_CASE(event, BA_EVENT_TRANSPORT_REMOVED, str);
+	EVENT_CASE(event, BA_EVENT_UPDATE_BATTERY, str);
+	EVENT_CASE(event, BA_EVENT_UPDATE_VOLUME, str);
 }
 
 static void delete_handle(bluezalsa_handle_t * h) {
@@ -117,7 +117,7 @@ failed:
 
 static int update_device_attach_state(bluezalsa_handle_t * h) {
 	int ret = -1;
-	struct msg_transport *transports = NULL;
+	struct ba_msg_transport *transports = NULL;
 
 	if (!h) {
 		error("%s: wrong handle\n", __func__);
@@ -151,7 +151,7 @@ static int update_device_attach_state(bluezalsa_handle_t * h) {
 
 	/* Iterate other available transport and find a match */
 	for (idx = 0; idx < nb_transports; idx++) {
-		struct msg_transport *transport = &transports[idx];
+		struct ba_msg_transport *transport = &transports[idx];
 
 #ifdef DEBUG
 		char taddr[32], myaddr[32];
@@ -167,8 +167,8 @@ static int update_device_attach_state(bluezalsa_handle_t * h) {
 		if (transport->type != h->type) {
 			continue;
 		}
-		if (transport->stream != PCM_STREAM_CAPTURE &&
-			transport->stream != PCM_STREAM_DUPLEX) {
+		if (transport->stream != BA_PCM_STREAM_CAPTURE &&
+			transport->stream != BA_PCM_STREAM_DUPLEX) {
 			continue;
 		}
 
@@ -193,15 +193,15 @@ static int update_device_attach_state(bluezalsa_handle_t * h) {
 
 	/* Open a transport now */
 
-	struct msg_transport * transport = &transports[idx];
+	struct ba_msg_transport * transport = &transports[idx];
 
-	transport->stream = PCM_STREAM_CAPTURE;
+	transport->stream = BA_PCM_STREAM_CAPTURE;
 	if ((h->snd_fd = bluealsa_open_transport(h->ba_fd, transport)) == -1) {
 		error("Couldn't open PCM FIFO: %s\n", strerror(errno));
 		goto failed;
 	}
 
-	memcpy(&h->transport, transport, sizeof(struct msg_transport));
+	memcpy(&h->transport, transport, sizeof(struct ba_msg_transport));
 	bacpy(&h->transport.addr, h->addr);
 
 	uint64_t u;
@@ -220,7 +220,7 @@ failed:
 static void * monitor_worker_routine(void *arg) {
 	bluezalsa_handle_t * h = (bluezalsa_handle_t*) arg;
 	for (;;) {
-		struct msg_event event;
+		struct ba_msg_event event;
 
 		int ret;
 
@@ -287,7 +287,7 @@ bluezalsa_handle_t  * bluezalsa_open(const char * interface) {
 		 goto failed;
 	 }
 
-	 if (bluealsa_subscribe(h->event_fd, EVENT_TRANSPORT_ADDED | EVENT_TRANSPORT_REMOVED) == -1) {
+	 if (bluealsa_subscribe(h->event_fd, BA_EVENT_TRANSPORT_ADDED | BA_EVENT_TRANSPORT_REMOVED) == -1) {
 		 log("%s:%s subscription failed: %s", LIBNAME, __func__, strerror(errno));
 		 goto failed;
 	 }
