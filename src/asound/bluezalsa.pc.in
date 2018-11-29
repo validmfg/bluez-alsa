@@ -1,0 +1,12 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@/alsa-lib
+includedir=@includedir@/bluez-alsa
+
+Name: bluezalsa
+Description: BluezAlsa modules
+URL: https://github.com/Arkq/bluez-alsa
+Version: @VERSION@
+Requires:
+Libs: -L${libdir} -lbluezalsa
+Cflags: -I{includedir}
