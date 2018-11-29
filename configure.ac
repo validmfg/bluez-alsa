@@ -159,6 +159,8 @@ AC_CONFIG_FILES([
 	Makefile
 	src/Makefile
 	src/asound/Makefile
+	src/bluealsalib/Makefile
+	src/bluealsalib/bluealsalib.pc
 	utils/Makefile
 	test/Makefile])
 AC_OUTPUT
