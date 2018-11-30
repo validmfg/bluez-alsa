@@ -9,6 +9,7 @@ asound_module_pcm_proxy_LTLIBRARIES = libasound_module_pcm_bluealsa_proxy.la
 
 pkginclude_HEADERS = \
 	../shared/ctl-client.h \
+	../shared/ctl-proto.h \
 	../shared/defs.h \
 	../shared/ffb.h \
 	../shared/log.h \
