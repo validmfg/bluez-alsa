@@ -33,7 +33,7 @@ void *io_thread_a2dp_source_ldac(void *arg);
 
 void *io_thread_sco(void *arg);
 
-#if DEBUG
+#ifdef DEBUG
 void *io_thread_a2dp_sink_dump(void *arg);
 #endif
 

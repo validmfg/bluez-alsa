@@ -96,7 +96,7 @@ void info(const char *format, ...) {
 	va_end(ap);
 }
 
-#if DEBUG
+#ifdef DEBUG
 void _debug(const char *format, ...) {
 	va_list ap;
 	va_start(ap, format);
@@ -105,7 +105,7 @@ void _debug(const char *format, ...) {
 }
 #endif
 
-#if DEBUG
+#ifdef DEBUG
 /**
  * Dump memory using hexadecimal representation.
  *
@@ -127,7 +127,7 @@ void hexdump(const char *label, const void *mem, size_t len) {
 }
 #endif
 
-#if DEBUG && HAVE_REGISTER_PRINTF_SPECIFIER
+#if defined(DEBUG) && defined(HAVE_REGISTER_PRINTF_SPECIFIER)
 /* Register 'B' specifier for printf() function family, so it can
  * be used to print integer values in a binary representation. */
 

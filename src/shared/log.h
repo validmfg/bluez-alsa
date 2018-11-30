@@ -29,14 +29,14 @@ void error(const char *format, ...) __attribute__ ((format(printf, 1, 2)));
 void warn(const char *format, ...) __attribute__ ((format(printf, 1, 2)));
 void info(const char *format, ...) __attribute__ ((format(printf, 1, 2)));
 
-#if DEBUG
+#ifdef DEBUG
 void _debug(const char *format, ...) __attribute__ ((format(printf, 1, 2)));
 # define debug(M, ARGS ...) _debug("%s:%d:%s: " M, __FILE__, __LINE__,__func__, ## ARGS)
 #else
 # define debug(M, ARGS ...) do {} while (0)
 #endif
 
-#if DEBUG
+#ifdef DEBUG
 void hexdump(const char *label, const void *mem, size_t len);
 #else
 # define hexdump(A, M, L) do {} while (0)

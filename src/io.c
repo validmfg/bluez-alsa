@@ -1786,7 +1786,7 @@ fail_ffb:
 	return NULL;
 }
 
-#if DEBUG
+#ifdef DEBUG
 /**
  * Dump incoming BT data to a file. */
 void *io_thread_a2dp_sink_dump(void *arg) {

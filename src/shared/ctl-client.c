@@ -44,7 +44,7 @@ static int bluealsa_status_to_errno(const struct ba_msg_status *status) {
 	}
 }
 
-#if DEBUG
+#ifdef DEBUG
 /**
  * Convert Bluetooth address into a human-readable string.
  *
@@ -213,7 +213,7 @@ int bluealsa_get_transport(int fd, bdaddr_t addr, enum ba_pcm_type type,
 	};
 	ssize_t len;
 
-#if DEBUG
+#ifdef DEBUG
 	char addr_[18];
 	ba2str_(&req.addr, addr_);
 	debug("Getting transport for %s type %d", addr_, type);
@@ -369,7 +369,7 @@ int bluealsa_open_transport(int fd, const struct ba_msg_transport *transport) {
 	};
 	ssize_t len;
 
-#if DEBUG
+#ifdef DEBUG
 	char addr_[18];
 	ba2str_(&req.addr, addr_);
 	debug("Requesting PCM open for %s", addr_);
@@ -411,7 +411,7 @@ int bluealsa_close_transport(int fd, const struct ba_msg_transport *transport) {
 		.stream = transport->stream,
 	};
 
-#if DEBUG
+#ifdef DEBUG
 	char addr_[18];
 	ba2str_(&req.addr, addr_);
 	debug("Closing PCM for %s", addr_);
@@ -437,7 +437,7 @@ int bluealsa_pause_transport(int fd, const struct ba_msg_transport *transport, b
 		.stream = transport->stream,
 	};
 
-#if DEBUG
+#ifdef DEBUG
 	char addr_[18];
 	ba2str_(&req.addr, addr_);
 	debug("Requesting PCM %s for %s", pause ? "pause" : "resume", addr_);
@@ -462,7 +462,7 @@ int bluealsa_drain_transport(int fd, const struct ba_msg_transport *transport) {
 		.stream = transport->stream,
 	};
 
-#if DEBUG
+#ifdef DEBUG
 	char addr_[18];
 	ba2str_(&req.addr, addr_);
 	debug("Requesting PCM drain for %s", addr_);
@@ -488,7 +488,7 @@ int bluealsa_send_rfcomm_command(int fd, bdaddr_t addr, const char *command) {
 	/* snprintf() guarantees terminating NULL character */
 	snprintf(req.rfcomm_command, sizeof(req.rfcomm_command), "%s", command);
 
-#if DEBUG
+#ifdef DEBUG
 	char addr_[18];
 	ba2str_(&req.addr, addr_);
 	debug("Sending RFCOMM command to %s: %s", addr_, req.rfcomm_command);
