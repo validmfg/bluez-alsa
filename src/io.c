@@ -44,10 +44,10 @@
 #include "bluealsa.h"
 #include "transport.h"
 #include "utils.h"
-#include "shared/defs.h"
-#include "shared/ffb.h"
-#include "shared/log.h"
-#include "shared/rt.h"
+#include "defs.h"
+#include "ffb.h"
+#include "log.h"
+#include "rt.h"
 
 
 /**

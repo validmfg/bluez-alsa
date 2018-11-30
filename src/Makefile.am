@@ -28,6 +28,7 @@ bluealsa_SOURCES += \
 endif
 
 AM_CFLAGS = \
+	-I$(top_srcdir)/src/shared \
 	@BLUEZ_CFLAGS@ \
 	@GLIB2_CFLAGS@ \
 	@GIO2_CFLAGS@ \

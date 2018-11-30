@@ -8,7 +8,7 @@
  *
  */
 
-#include "shared/log.h"
+#include "log.h"
 
 #include <pthread.h>
 #include <stdarg.h>
@@ -17,7 +17,7 @@
 #include <string.h>
 #include <syslog.h>
 
-#include "shared/rt.h"
+#include "rt.h"
 
 
 /* internal logging identifier */

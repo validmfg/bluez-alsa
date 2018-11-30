@@ -19,9 +19,9 @@
 #include <alsa/asoundlib.h>
 #include <alsa/control_external.h>
 
-#include "shared/ctl-client.h"
-#include "shared/ctl-proto.h"
-#include "shared/log.h"
+#include "ctl-client.h"
+#include "ctl-proto.h"
+#include "log.h"
 
 
 enum ctl_elem_type {

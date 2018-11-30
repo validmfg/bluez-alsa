@@ -20,8 +20,8 @@
 #include "bluealsa.h"
 #include "ctl.h"
 #include "utils.h"
-#include "shared/defs.h"
-#include "shared/log.h"
+#include "defs.h"
+#include "log.h"
 
 
 /**

@@ -19,6 +19,7 @@ pkgconfig_DATA =bluealsalib.pc
 
 AM_CFLAGS = \
 	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/shared \
 	@ALSA_CFLAGS@ \
 	@BLUEZ_CFLAGS@ \
 	@GIO2_CFLAGS@

@@ -43,6 +43,7 @@ asound_module_datadir = @ALSA_DATA_DIR@/alsa.conf.d
 
 AM_CFLAGS = \
 	-I$(top_srcdir)/src \
+	-I$(top_srcdir)/src/shared \
 	@ALSA_CFLAGS@ \
 	@BLUEZ_CFLAGS@ \
 	@GLIB2_CFLAGS@

@@ -16,8 +16,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "shared/defs.h"
-#include "shared/log.h"
+#include "defs.h"
+#include "log.h"
 
 
 /**

@@ -27,7 +27,7 @@
 
 #include "bluez.h"
 #include "bluez-a2dp.h"
-#include "shared/ctl-proto.h"
+#include "ctl-proto.h"
 
 /* Maximal number of clients connected to the controller. */
 #define BLUEALSA_MAX_CLIENTS 7

@@ -23,10 +23,10 @@
 #include <alsa/asoundlib.h>
 #include <alsa/pcm_external.h>
 
-#include "shared/ctl-client.h"
-#include "shared/ctl-proto.h"
-#include "shared/log.h"
-#include "shared/rt.h"
+#include "ctl-client.h"
+#include "ctl-proto.h"
+#include "log.h"
+#include "rt.h"
 
 #undef debug
 #define debug printf

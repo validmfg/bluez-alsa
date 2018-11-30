@@ -22,7 +22,7 @@
 #include "ofono-iface.h"
 #include "bluealsa.h"
 #include "transport.h"
-#include "shared/log.h"
+#include "log.h"
 #include "ctl.h"
 
 #include <gio/gunixfdlist.h>
